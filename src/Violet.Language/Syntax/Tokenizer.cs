@@ -202,6 +202,7 @@ class Tokenizer
             case '}': return SingleCharacterToken(SyntaxKind.RightBraceToken);
             case '.': return SingleCharacterToken(SyntaxKind.DotToken);
             case ',': return SingleCharacterToken(SyntaxKind.CommaToken);
+            case ';': return SingleCharacterToken(SyntaxKind.SemicolonToken);
             case '&': return UpToTwoOperator(SyntaxKind.AmpersandToken, '&', SyntaxKind.AmpersandAmpersandToken, '=', SyntaxKind.AmpersandEqualToken);
             case '|': return UpToTwoOperator(SyntaxKind.PipeToken, '|', SyntaxKind.PipePipeToken, '=', SyntaxKind.PipeEqualToken);
             case '^': return UpToTwoOperator(SyntaxKind.HatToken, '=', SyntaxKind.HatEqualToken);
@@ -215,6 +216,11 @@ class Tokenizer
             case '_':
             case var x when char.IsLetter(x):
                 _window.NextWhile(c => char.IsLetter(c) || char.IsDigit(c) || c == '_');
+                if (SyntaxFacts.TryGetKeyword(_window.Content, out var keyword))
+                {
+                    return (keyword, null);
+                }
+
                 return (SyntaxKind.IdentifierToken, _window.Content);
 
             case var x when char.IsDigit(x):

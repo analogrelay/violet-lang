@@ -218,7 +218,6 @@ public class TokenizerTests
         (SyntaxKind.GreaterThanToken, SyntaxKind.EqualsEqualsToken),
         (SyntaxKind.LessThanToken, SyntaxKind.EqualsToken),
         (SyntaxKind.LessThanToken, SyntaxKind.EqualsEqualsToken),
-        (SyntaxKind.IdentifierToken, SyntaxKind.NumberToken),
         (SyntaxKind.MinusToken, SyntaxKind.NumberToken), // -123 is just a number
         (SyntaxKind.PlusToken, SyntaxKind.NumberToken), // +123 is just a number
         (SyntaxKind.SlashToken, SyntaxKind.StarToken), // '/*' is a multi-line comment
@@ -237,6 +236,11 @@ public class TokenizerTests
         }
 
         if(leftIsKeywordOrIdentifier && rightIsKeywordOrIdentifier)
+        {
+            return true;
+        }
+
+        if (leftIsKeywordOrIdentifier && right == SyntaxKind.NumberToken)
         {
             return true;
         }

@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+#/ Usage: script/vi-to-il <vi-file>
+#/ Description: Compile a Violet file and shows the IL
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+repo_root_dir="$( cd "${script_dir}/.." && pwd )"
+cd "${repo_root_dir}"
+
+set -euo pipefail
+
+if [ "$VIOLET_IN_DEV_SHELL" != "1" ]; then
+    echo "WARNING: Not in the violet dev shell. We recommend running 'script/shell' first."
+    echo "Continue? [y/N]"
+    read -r response
+    if [[ ! "$response" =~ ^([yY][eE][sS]|[yY])+$ ]]; then
+        exit 1
+    fi
+fi
+
+vi_file=
+bat_args=()
+output_arg="-il"
+while [[ $# -gt 0 ]]; do
+    key="$1"
+    shift
+    case "$key" in
+        -h|--help)
+            grep '^#/' <"$0" | cut -c4-
+            exit 0
+            ;;
+        --il)
+            output_arg="-il"
+            bat_args=()
+            ;;
+        --cs)
+            bat_args=("--language" "C#")
+            output_arg=
+            ;;
+        *)
+            vi_file="$key"
+            ;;
+    esac
+done
+
+if [ -z "$vi_file" ]; then
+    echo "ERROR: No Violet file specified."
+    grep '^#/' <"$0" | cut -c4-
+    exit 1
+fi
+
+tmp_dir="$(mktemp -d)"
+trap 'rm -rf "$tmp_dir"' EXIT
+
+dotnet run --project "./src/violetc" -- "$vi_file" --output "$tmp_dir/Output.dll" --reference "$VIOLET_DOTNET_SDK_PATH/packs/Microsoft.NETCore.App.Ref/8.0.0/ref/net8.0/System.Console.dll" --reference "$VIOLET_DOTNET_SDK_PATH/packs/Microsoft.NETCore.App.Ref/8.0.0/ref/net8.0/System.Runtime.dll"
+dotnet ilspycmd ${output_arg:-} "$tmp_dir/Output.dll" | bat --style snip "${bat_args[@]}" --theme DarkNeon

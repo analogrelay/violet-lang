@@ -9,15 +9,27 @@ public class SyntaxFactsTests
         var tokensByName = new SortedSet<SyntaxKind>(Tokens());
         tokensByHelper.ExceptWith(tokensByName);
         Assert.Empty(tokensByHelper);
+
+        // Validate that the other helpers return false for tokens
+        Assert.DoesNotContain(tokensByName, k => k.IsKeyword());
+        Assert.DoesNotContain(tokensByName, k => k.IsNode());
+        Assert.DoesNotContain(tokensByName, k => k.IsTrivia());
+        Assert.DoesNotContain(tokensByName, k => k.IsMarker());
     }
 
     [Fact]
-    public void IsTrivialReturnsTrueForAllTrivia()
+    public void IsTriviaReturnsTrueForAllTrivia()
     {
         var triviaByHelper = new SortedSet<SyntaxKind>(AllKinds().Where(k => k.IsTrivia()));
         var triviaByName = new SortedSet<SyntaxKind>(Trivia());
         triviaByHelper.ExceptWith(triviaByName);
         Assert.Empty(triviaByHelper);
+
+        // Validate that the other helpers return false for trivia
+        Assert.DoesNotContain(triviaByName, k => k.IsKeyword());
+        Assert.DoesNotContain(triviaByName, k => k.IsNode());
+        Assert.DoesNotContain(triviaByName, k => k.IsToken());
+        Assert.DoesNotContain(triviaByName, k => k.IsMarker());
     }
 
     [Fact]
@@ -27,6 +39,27 @@ public class SyntaxFactsTests
         var markersByName = new SortedSet<SyntaxKind>(Markers());
         markersByHelper.ExceptWith(markersByName);
         Assert.Empty(markersByHelper);
+
+        // Validate that the other helpers return false for markers
+        Assert.DoesNotContain(markersByName, k => k.IsKeyword());
+        Assert.DoesNotContain(markersByName, k => k.IsNode());
+        Assert.DoesNotContain(markersByName, k => k.IsToken());
+        Assert.DoesNotContain(markersByName, k => k.IsTrivia());
+    }
+
+    [Fact]
+    public void IsKeywordReturnsTrueForAllKeywords()
+    {
+        var keywordsByHelper = new SortedSet<SyntaxKind>(AllKinds().Where(k => k.IsKeyword()));
+        var keywordsByName = new SortedSet<SyntaxKind>(Keywords());
+        keywordsByHelper.ExceptWith(keywordsByName);
+        Assert.Empty(keywordsByHelper);
+
+        // Validate that the other helpers return false for keywords
+        Assert.DoesNotContain(keywordsByName, k => k.IsMarker());
+        Assert.DoesNotContain(keywordsByName, k => k.IsNode());
+        Assert.DoesNotContain(keywordsByName, k => k.IsToken());
+        Assert.DoesNotContain(keywordsByName, k => k.IsTrivia());
     }
 
     [Fact]
@@ -36,12 +69,18 @@ public class SyntaxFactsTests
         var nodesByName = new SortedSet<SyntaxKind>(Nodes());
         nodesByHelper.ExceptWith(nodesByName);
         Assert.Empty(nodesByHelper);
+
+        // Validate that the other helpers return false for nodes
+        Assert.DoesNotContain(nodesByName, k => k.IsMarker());
+        Assert.DoesNotContain(nodesByName, k => k.IsKeyword());
+        Assert.DoesNotContain(nodesByName, k => k.IsToken());
+        Assert.DoesNotContain(nodesByName, k => k.IsTrivia());
     }
 
     [Fact]
-    public void GetTextHasValueForNonDynamicTokens()
+    public void GetTextHasValueForNonDynamicTokensAndKeywords()
     {
-        var tokens = new SortedSet<SyntaxKind>(Tokens());
+        var tokens = new SortedSet<SyntaxKind>(Tokens().Concat(Keywords()));
 
         // Remove dynamic tokens
         tokens.Remove(SyntaxKind.NumberToken);
@@ -56,18 +95,21 @@ public class SyntaxFactsTests
         Assert.Empty(tokens);
     }
 
-    public static IEnumerable<SyntaxKind> AllKinds()
+    static IEnumerable<SyntaxKind> AllKinds()
         => Enum.GetValues<SyntaxKind>();
 
-    public static IEnumerable<SyntaxKind> Tokens()
+    static IEnumerable<SyntaxKind> Tokens()
         => AllKinds().Where(e => e.ToString().EndsWith("Token"));
 
-    public static IEnumerable<SyntaxKind> Trivia()
+    static IEnumerable<SyntaxKind> Trivia()
         => AllKinds().Where(e => e.ToString().EndsWith("Trivia"));
 
-    public static IEnumerable<SyntaxKind> Markers()
+    static IEnumerable<SyntaxKind> Markers()
         => AllKinds().Where(e => e.ToString().EndsWith("Marker"));
 
-    public static IEnumerable<SyntaxKind> Nodes()
-        => AllKinds().Except(Tokens()).Except(Trivia()).Except(Markers());
+    static IEnumerable<SyntaxKind> Keywords()
+        => AllKinds().Where(e => e.ToString().EndsWith("Keyword"));
+
+    static IEnumerable<SyntaxKind> Nodes()
+        => AllKinds().Except(Tokens()).Except(Trivia()).Except(Markers()).Except(Keywords());
 }

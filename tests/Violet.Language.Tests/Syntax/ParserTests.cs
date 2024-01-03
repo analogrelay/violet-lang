@@ -61,7 +61,7 @@ public class ParserTests
         var diag = Assert.Single(diagnostics);
         Assert.Equal(DiagnosticDescriptors.ComparisonsCannotBeChained, diag.Descriptor);
         Assert.Empty(diag.MessageArgs);
-        Assert.Equal(new TextSpan(op1Text.Length + 5, op2Text.Length), diag.Location.Span);
+        Assert.Equal(new TextSpan(op1Text.Length + 20, op2Text.Length), diag.Location.Span);
 
         // Expect that the parser _did_ recover and still produced a valid expression.
         using var w = new TreeAsserter(expression);
@@ -123,7 +123,13 @@ public class ParserTests
 
     (ExpressionSyntax, ImmutableArray<Diagnostic>) ParseExpression(string text, bool expectDiagnostics = false)
     {
-        var syntaxTree = SyntaxTree.Parse(text);
+        var actualText = $"""
+                          fun Main()
+                              {text};
+                          end fun
+                          """;
+
+        var syntaxTree = SyntaxTree.Parse(actualText);
         if (!expectDiagnostics)
         {
             Assert.Empty(syntaxTree.Diagnostics);
@@ -131,8 +137,9 @@ public class ParserTests
 
         var root = syntaxTree.Root;
         var member = Assert.Single(root.Members);
-        var globalStatement = Assert.IsType<GlobalStatementSyntax>(member);
-        var exprStatement = Assert.IsType<ExpressionStatementSyntax>(globalStatement.Statement);
+        var funDecl = Assert.IsType<FunctionDeclarationSyntax>(member);
+        var stmt = Assert.Single(funDecl.Body.Statements);
+        var exprStatement = Assert.IsType<ExpressionStatementSyntax>(stmt);
         return (exprStatement.Expression, syntaxTree.Diagnostics);
     }
 

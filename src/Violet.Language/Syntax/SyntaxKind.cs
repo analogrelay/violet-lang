@@ -53,6 +53,11 @@ public enum SyntaxKind
     RightBraceToken,
     DotToken,
     CommaToken,
+    SemicolonToken,
+
+    // Keywords
+    FunKeyword,
+    EndKeyword,
 
     // Abstract Syntax Tree nodes.
     CompilationUnit,
@@ -61,6 +66,7 @@ public enum SyntaxKind
     LiteralExpression,
     CallExpression,
     NameExpression,
-    GlobalStatement,
-    ExpressionStatement
+    ExpressionStatement,
+    FunctionDeclaration,
+    BlockStatement
 }

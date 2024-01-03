@@ -95,11 +95,27 @@ public static class SyntaxFacts
             SyntaxKind.RightBraceToken => "}",
             SyntaxKind.DotToken => ".",
             SyntaxKind.CommaToken => ",",
+            SyntaxKind.SemicolonToken => ";",
+
+            SyntaxKind.FunKeyword => "fun",
+            SyntaxKind.EndKeyword => "end",
             _ => null,
         };
 
+    public static bool TryGetKeyword(string text, out SyntaxKind kind)
+    {
+        kind = text switch
+        {
+            "fun" => SyntaxKind.FunKeyword,
+            "end" => SyntaxKind.EndKeyword,
+            _ => SyntaxKind.UnknownMarker,
+        };
+
+        return kind != SyntaxKind.UnknownMarker;
+    }
+
     public static bool IsNode(this SyntaxKind kind)
-        => !kind.IsToken() && !kind.IsTrivia() && !kind.IsMarker();
+        => !kind.IsToken() && !kind.IsTrivia() && !kind.IsMarker() && !kind.IsKeyword();
 
     public static bool IsMarker(this SyntaxKind kind) => kind switch
     {
@@ -158,11 +174,16 @@ public static class SyntaxFacts
         SyntaxKind.RightBraceToken => true,
         SyntaxKind.DotToken => true,
         SyntaxKind.CommaToken => true,
+        SyntaxKind.SemicolonToken => true,
         _ => false,
     };
 
-    // TODO: Keywords!
-    public static bool IsKeyword(this SyntaxKind kind) => false;
+    public static bool IsKeyword(this SyntaxKind kind) => kind switch
+    {
+        SyntaxKind.FunKeyword => true,
+        SyntaxKind.EndKeyword => true,
+        _ => false,
+    };
 
     public static IEnumerable<SyntaxKind> AllKinds() => Enum.GetValues<SyntaxKind>();
     public static IEnumerable<SyntaxKind> Tokens() => AllKinds().Where(k => k.IsToken());

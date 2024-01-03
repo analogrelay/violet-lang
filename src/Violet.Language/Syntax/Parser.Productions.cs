@@ -1,6 +1,4 @@
 using System.Collections.Immutable;
-using System.Data;
-using System.Net.Http.Headers;
 
 namespace Violet.Language.Syntax;
 
@@ -13,17 +11,56 @@ partial class Parser
         var members = ImmutableArray.CreateBuilder<MemberSyntax>();
         while (!At(SyntaxKind.EndOfFileMarker))
         {
-            var stmt = Statement();
-            members.Add(new GlobalStatementSyntax(syntaxTree, stmt));
+            var member = Member();
+            members.Add(member);
         }
 
         return new CompilationUnitSyntax(syntaxTree, members.ToImmutableArray());
     }
 
+    MemberSyntax Member()
+    {
+        if (At(SyntaxKind.FunKeyword))
+        {
+            return FunctionDeclaration();
+        }
+
+        _diagnostics.Add(DiagnosticDescriptors.ExpectedMember, Current.Location, Current.Kind);
+        throw new NotImplementedException("TODO: Recovery from invalid member");
+    }
+
+    FunctionDeclarationSyntax FunctionDeclaration()
+    {
+        var fun = Expect(SyntaxKind.FunKeyword);
+        var identifier = Expect(SyntaxKind.IdentifierToken);
+        var openParen = Expect(SyntaxKind.LeftParenthesisToken);
+        var closeParen = Expect(SyntaxKind.RightParenthesisToken);
+        var body = BlockStatement(SyntaxKind.FunKeyword);
+        var end = Expect(SyntaxKind.EndKeyword);
+        var endFun = Expect(SyntaxKind.FunKeyword);
+        return new FunctionDeclarationSyntax(
+            syntaxTree, fun, identifier, openParen, closeParen,
+            body,
+            end, endFun);
+    }
+
+    BlockStatementSyntax BlockStatement(SyntaxKind blockTypeKeyword)
+    {
+        var statements = ImmutableArray.CreateBuilder<StatementSyntax>();
+        while (!At(SyntaxKind.EndKeyword))
+        {
+            var stmt = Statement();
+            statements.Add(stmt);
+        }
+
+        return new BlockStatementSyntax(syntaxTree, statements.ToImmutableArray());
+    }
+
     StatementSyntax Statement()
     {
         var expr = Expression();
-        return new ExpressionStatementSyntax(syntaxTree, expr);
+        var semicolon = Expect(SyntaxKind.SemicolonToken);
+        return new ExpressionStatementSyntax(syntaxTree, expr, semicolon);
     }
 
     ExpressionSyntax Expression()

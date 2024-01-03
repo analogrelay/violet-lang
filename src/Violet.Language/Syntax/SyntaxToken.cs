@@ -62,19 +62,19 @@ public record SyntaxToken : SyntaxNode
 
         foreach (var lt in LeadingTrivia)
         {
-            writer.WriteLine($"{indentString}/{lt.Kind}[{lt.Span}] \"{lt.Text}\"");
+            writer.WriteLine($"{indentString}/{lt.Kind}[{lt.Span}] \"{lt.Text.Unescape()}\"");
         }
 
         writer.WriteLine($"{indentString}{FormatSelf()}");
 
         foreach (var tt in TrailingTrivia)
         {
-            writer.WriteLine($"{indentString}\\{tt.Kind}[{tt.Span}] \"{tt.Text}\"");
+            writer.WriteLine($"{indentString}\\{tt.Kind}[{tt.Span}] \"{tt.Text.Unescape()}\"");
         }
     }
 
     protected override string FormatSelf()
     {
-        return $"{base.FormatSelf()} \"{Text}\"";
+        return $"{base.FormatSelf()} \"{Text.Unescape()}\"";
     }
 }

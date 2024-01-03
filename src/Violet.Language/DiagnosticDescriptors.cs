@@ -45,4 +45,29 @@ static class DiagnosticDescriptors
         DiagnosticSeverity.Error,
         "Comparison cannot be chained",
         "Comparison operators cannot be chained");
+
+    public static readonly DiagnosticDescriptor ExpectedMember = new(
+        "VI1002",
+        DiagnosticSeverity.Error,
+        "Expected a Member",
+        "Expected a member declaration, but found <{0}>");
+
+    // Errors 2000-2999 are reserved for binding.
+    public static readonly DiagnosticDescriptor SymbolAlreadyDeclared = new(
+        "VI2000",
+        DiagnosticSeverity.Error,
+        "Symbol Already Declared",
+        "A symbol named '{0}' has already been declared in this scope");
+
+    public static readonly DiagnosticDescriptor UndefinedFunction = new(
+        "VI2001",
+        DiagnosticSeverity.Error,
+        "Undefined Function",
+        "Could not resolve function '{0}'");
+
+    public static readonly DiagnosticDescriptor NotCallable = new(
+        "VI2002",
+        DiagnosticSeverity.Error,
+        "Not Callable",
+        "The expression '{0}' is not callable");
 }

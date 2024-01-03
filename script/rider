@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+#/ Usage: script/rider
+#/ Description: Launch the Violet solution in Rider.
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+repo_root_dir="$( cd "${script_dir}/.." && pwd )"
+cd "${repo_root_dir}"
+
+if [ "$VIOLET_IN_DEV_SHELL" != "1" ]; then
+    echo "WARNING: Not in the violet dev shell. We recommend running 'script/shell' first."
+    echo "Continue? [y/N]"
+    read -r response
+    if [[ ! "$response" =~ ^([yY][eE][sS]|[yY])+$ ]]; then
+        exit 1
+    fi
+fi
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -h|--help)
+            grep '^#/' <"$0" | cut -c4-
+            exit 0
+            ;;
+        *)
+            echo "ERROR: Unexpected argument '$1'."
+            grep '^#/' <"$0" | cut -c4-
+            exit 1
+            ;;
+    esac
+done
+
+rider_path="$VIOLET_RIDER_PATH/bin/rider"
+if [ ! -f "$rider_path" ]; then
+    echo "ERROR: Rider not found at '$rider_path'."
+    echo "Your dev shell is broken!"
+    exit 1
+fi
+
+"$rider_path" "$repo_root_dir/violet-lang.sln"
